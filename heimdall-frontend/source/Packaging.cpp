@@ -283,27 +283,27 @@ bool Packaging::WriteTarEntry(const QString& filePath, QTemporaryFile *tarFile, 
 	if (permissions.testFlag(QFile::ReadOwner))
 		mode |= TarHeader::kModeOwnerRead;
 
-	sprintf(tarHeader.fields.mode, "%07o", mode);
+	snprintf(tarHeader.fields.mode, sizeof(tarHeader.fields.mode), "%07o", mode);
 
 	// Owner id
 	uint id = qtFileInfo.ownerId();
 
 	if (id < 2097151)
-		sprintf(tarHeader.fields.userId, "%07o", id);
+		snprintf(tarHeader.fields.userId, sizeof(tarHeader.fields.userId), "%07o", id);
 	else
-		sprintf(tarHeader.fields.userId, "%07o", 0);
+		snprintf(tarHeader.fields.userId, sizeof(tarHeader.fields.userId), "%07o", 0);
 
 	// Group id
 	id = qtFileInfo.groupId();
 
 	if (id < 2097151)
-		sprintf(tarHeader.fields.groupId, "%07o", id);
+		snprintf(tarHeader.fields.groupId, sizeof(tarHeader.fields.groupId), "%07o", id);
 	else
-		sprintf(tarHeader.fields.groupId, "%07o", 0);
+		snprintf(tarHeader.fields.groupId, sizeof(tarHeader.fields.groupId), "%07o", 0);
 
 	// Note: We don't support base-256 encoding. Support could be added later.
-	sprintf(tarHeader.fields.size, "%011llo", file.size());
-	sprintf(tarHeader.fields.modifiedTime, "%llu", qtFileInfo.lastModified().toSecsSinceEpoch());
+	snprintf(tarHeader.fields.size, sizeof(tarHeader.fields.size), "%011llo", file.size());
+	snprintf(tarHeader.fields.modifiedTime, sizeof(tarHeader.fields.modifiedTime), "%llu", qtFileInfo.lastModified().toSecsSinceEpoch());
 		
 	// Regular File
 	tarHeader.fields.typeFlag = '0';
@@ -315,7 +315,7 @@ bool Packaging::WriteTarEntry(const QString& filePath, QTemporaryFile *tarFile, 
 	for (int i = 0; i < TarHeader::kTarHeaderLength; i++)
 		checksum += static_cast<unsigned char>(tarHeader.buffer[i]);
 
-	sprintf(tarHeader.fields.checksum, "%07o", checksum);
+	snprintf(tarHeader.fields.checksum, sizeof(tarHeader.fields.checksum), "%07o", checksum);
 
 	// Write the header to the TAR file.
 	tarFile->write(tarHeader.buffer, TarHeader::kBlockLength);
